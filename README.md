@@ -140,9 +140,12 @@ cd playground
 git clone https://github.com/VictorGil/transfers_websockets_service.git
 ```
 
-## start with maven
-cd transfers_websocket_service
-docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven:3.5.3-jdk-11-slim mvn clean install
+## set maven docker container
+
+```bash
+DOCKER_MAVEN_PROJECT_CONTAINER="maven:3.6.3-jdk-13"
+echo "DOCKER_MAVEN_PROJECT_CONTAINER ${DOCKER_MAVEN_PROJECT_CONTAINER}"
+```
 
 ## git clone transfer-api
 
@@ -153,23 +156,116 @@ sudo rm -rf transfers_api
 git clone https://github.com/VictorGil/transfers_api.git
 cd transfers_api
 # down grad java reason missing container
-sed -i 's@<java.version>12</java.version>@<java.version>11</java.version>@g' pom.xml
-docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven:3.5.3-jdk-11-slim mvn clean install
+#sed -i 's@<java.version>12</java.version>@<java.version>11</java.version>@g' pom.xml
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn clean install
+
+
+cd
+cd playground
+PROJECT="transfers_api"
+sudo rm -rf "${PROJECT}"
+GIT_URL="https://github.com/VictorGil/transfers_api.git"
+JAR_FILE_NAME="transfers-api-1.1.0.jar"
+sudo rm -rf "${PROJECT}"
+git clone "${GIT_URL}"
+cd "${PROJECT}"
+#sed -i 's@<java.version>.*</java.version>@<java.version>11</java.version>@g' pom.xml
+# build with docker-maven
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn clean install
+# import to maven local repo
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=target/${JAR_FILE_NAME}
+
 
 ```
-
-## import in local repo maven-repo
-docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven:3.5.3-jdk-11-slim mvn install:install-file –Dfile=./target/transfers-api-1.1.0.jar -DgroupId=net.devaction.kafka -DartifactId=transfers-api -Dversion=1.1.0
-
 
 ## git clone https://github.com/VictorGil/transfers_recording_service.git
 
 ```bash
 cd
 cd playground
-git clone https://github.com/VictorGil/transfers_recording_service.git
-cd transfer_recording_services
+PROJECT="transfers_recording_service"
+sudo rm -rf "${PROJECT}"
+GIT_URL="https://github.com/VictorGil/transfers_recording_service.git"
+JAR_FILE_NAME="transfers-recording-service-1.1.0.jar"
+sudo rm -rf "${PROJECT}"
+git clone "${GIT_URL}"
+cd "${PROJECT}"
+#sed -i 's@<java.version>.*</java.version>@<java.version>11</java.version>@g' pom.xml
 # build with docker-maven
-docker run -it --rm --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven:3.6.3-jdk-11-slim mvn -X clean install
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn clean install
+# import to maven local repo
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=target/${JAR_FILE_NAME}
+```
 
+## https://github.com/VictorGil/kafka_util.git
+
+```bash
+cd
+cd playground
+PROJECT="kafka_util"
+GIT_URL="https://github.com/VictorGil/kafka_util.git"
+JAR_FILE_NAME="kafka-util-1.0.0-SNAPSHOT.jar"
+sudo rm -rf "${PROJECT}"
+git clone "${GIT_URL}"
+cd "${PROJECT}"
+#sed -i 's@<java.version>.*</java.version>@<java.version>11</java.version>@g' pom.xml
+# build with docker-maven
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn clean install
+# import to maven local repo
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=target/${JAR_FILE_NAME}
+```
+
+## https://github.com/VictorGil/account_balance_workflow_api.git
+
+```bash
+cd
+cd playground
+PROJECT="account_balance_workflow_api"
+GIT_URL="https://github.com/VictorGil/account_balance_workflow_api.git"
+JAR_FILE_NAME="account-balance-workflow-api-1.0.0.jar"
+sudo rm -rf "${PROJECT}"
+git clone "${GIT_URL}"
+cd "${PROJECT}"
+#sed -i 's@<java.version>.*</java.version>@<java.version>11</java.version>@g' pom.xml
+# build with docker-maven
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn clean install
+# import to maven local repo
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=target/${JAR_FILE_NAME}
+```
+
+## https://github.com/VictorGil/cadence_transfers_recording_service.git
+
+```bash
+cd
+cd playground
+PROJECT="cadence_transfers_recording_service"
+GIT_URL="https://github.com/VictorGil/cadence_transfers_recording_service.git"
+JAR_FILE_NAME="transfers-recording-service-1.0.0-SNAPSHOT.jar"
+sudo rm -rf "${PROJECT}"
+git clone "${GIT_URL}"
+cd "${PROJECT}"
+#sed -i 's@<java.version>.*</java.version>@<java.version>11</java.version>@g' pom.xml
+# build with docker-maven
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn clean install
+# import to maven local repo
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=target/${JAR_FILE_NAME}
+```
+
+## start with maven
+
+```bash
+cd
+cd playground
+PROJECT="transfers_websockets_service"
+sudo rm -rf "${PROJECT}"
+GIT_URL="https://github.com/VictorGil/transfers_websockets_service.git"
+JAR_FILE_NAME="transfers-websockets-service-1.0.0.jar"
+sudo rm -rf "${PROJECT}"
+git clone "${GIT_URL}"
+cd "${PROJECT}"
+#sed -i 's@<java.version>.*</java.version>@<java.version>11</java.version>@g' pom.xml
+# build with docker-maven
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn clean install
+# import to maven local repo
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=target/${JAR_FILE_NAME}
 ```
