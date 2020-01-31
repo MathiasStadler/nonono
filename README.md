@@ -269,3 +269,18 @@ docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)"
 # import to maven local repo
 docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=target/${JAR_FILE_NAME}
 ```
+
+
+## install docker composer from docker.io
+
+```bash
+sudo curl -L "https://github.com/docker/compose/releases/download/1.25.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+
+```
+
+
+## confluent kafka
+
+- follow this https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html?utm_medium=sem&utm_source=google&utm_campaign=ch.sem_br.brand_tp.prs_tgt.confluent-brand_mt.xct_rgn.emea_lng.eng_dv.all&utm_term=confluent%20kafka%20docker&creative=&device=t&placement=&gclid=EAIaIQobChMIx5TGx9Cf5wIVRed3Ch1eDwXsEAAYASAAEgLhvPD_BwE
+
