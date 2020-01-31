@@ -128,7 +128,6 @@ sudo docker run -p 0.0.0.0:4200:4200 -v "$PWD":/usr/src/app -w /usr/src/app node
 @TODO
 - hint: Add --host 0.0.0.0 to ng run  inside the package.json to reach network wide
 
-
 ## prepare Reusing the Maven local repository
 docker volume create --name maven-repo
 
@@ -268,8 +267,44 @@ cd "${PROJECT}"
 docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn clean install
 # import to maven local repo
 docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=target/${JAR_FILE_NAME}
+# import classes/config.json to repo
+IMPORT_FILE="classes/config.json"
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=target/${IMPORT_FILE}
 ```
 
+## copy config files
+
+```bash
+ docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} sh -c 'mkdir -p /root/.m2/config_files; cp /usr/src/mymaven/target/classes/*json /root/.m2/config_files;cp /usr/src/mymaven/target/classes/*xml /root/.m2/config_files'
+
+#test
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} sh -c 'ls -l /root/.m2/config_files'
+```
+
+
+## set classpath 
+
+```bash
+ docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} sh -c 'for findName in 'jar' 'xml' 'json' ;do find "/root/.m2" -name "*.${findName}"  | xargs echo  |tr '[:blank:]' ':'|tee /root/.m2/classpath; done'
+
+
+ docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} sh -c 'rm -rf /root/.m2/classpath && for findName in 'jar' 'xml' 'json' ;do find "/root/.m2" -name "*.${findName}"  | xargs echo  |tr '[:blank:]' ':'|tee -a /root/.m2/classpath; done;sed -i ':a' -e 'N' -e '$!ba' -e 's/\n/:/g' /root/.m2/classpath '
+
+ docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} sh -c 'rm -rf /root/.m2/classpath && for findName in 'jar' 'xml' 'json' ;do find "/root/.m2" -name "*.${findName}"  | xargs echo  |tee -a /root/.m2/classpath; done ; echo $(</root/.m2/classpath)  |tr '[:blank:]' ':' | tee /root/.m2/classpath' 
+
+
+
+# test
+
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} sh -c 'cat /root/.m2/classpath;wc -l /root/.m2/classpath'
+
+```
+
+## run java
+
+```bash
+docker run -it --rm -v maven-repo:/root/.m2  --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven ${DOCKER_MAVEN_PROJECT_CONTAINER} sh -c 'export CLASSPATH=$(cat /root/.m2/classpath); java  net.devaction.kafka.transferswebsocketsservice.server.WebSocketsServiceMain'
+```
 
 ## install docker composer from docker.io
 
@@ -279,8 +314,6 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.25.3/docker-
 
 ```
 
-
 ## confluent kafka
 
 - follow this https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html?utm_medium=sem&utm_source=google&utm_campaign=ch.sem_br.brand_tp.prs_tgt.confluent-brand_mt.xct_rgn.emea_lng.eng_dv.all&utm_term=confluent%20kafka%20docker&creative=&device=t&placement=&gclid=EAIaIQobChMIx5TGx9Cf5wIVRed3Ch1eDwXsEAAYASAAEgLhvPD_BwE
-
